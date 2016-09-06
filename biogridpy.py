@@ -27,11 +27,60 @@ class BioGrid(object):
         BASE_URL = 'http://webservice.thebiogrid.org/'
         self.BASE_URL = BASE_URL
         #Endpoints
+        self.EVIDENCE_URL = BASE_URL + 'evidence/'
         self.IDENTIFIERS_URL = BASE_URL + 'identifiers/'
         self.INTERACTIONS_URL = BASE_URL + 'interactions/'
         self.ORGANISMS_URL = BASE_URL + 'organisms/'
         self.VERSION_URL = BASE_URL + 'version/'
 
+    def evidence(self, Format='tab2', tab2_format='str'):
+        """
+        Returns valid identifier types
+        
+        Usage:
+        # Default params return a string identical to the default webservice:
+        # http://webservice.thebiogrid.org/identifiers/?accesskey=[ACCESSKEY]
+        >>> id_types = BioGrid().identifiers(Format='tab2', tab2_format='str')
+        
+        # For a Python list of the identifiers, change tab2_format to 'list':
+        >>> id_types = BioGrid().identifiers(Format='tab2', tab2_format='list')
+        
+        # Finally, to replicate the "format=json" parameter:
+        >>> id_types = BioGrid().identifiers(Format='json')
+        
+        Docs:
+        The URL http://webservice.thebiogrid.org/evidence/?accesskey=[ACCESSKEY]
+        will retrieve the list of evidence names supported by the REST
+        evidenceList option. This call only supports the accessKey and format
+        parameters (can be tab2 or json
+        (e.g. http://webservice.thebiogrid.org/evidence/?accesskey=[ACCESSKEY]&format=json). 
+        """
+        query_params = (('accessKey', self.access_key),
+                        ('format', Format)
+                        )
+        
+        query_params = [(param[0], param[1].encode('utf-8')
+                         if type(param[1]) is types.UnicodeType
+                         else param[1]) for param in query_params]
+                             
+        query_string = urlencode(query_params)
+        query_string = '{0}?{1}'.format(self.EVIDENCE_URL, query_string)
+        
+        request = urlopen(query_string)
+        results = request.read()
+        
+        if Format == 'json':
+            ids_json = self.byteify(json.loads(results))
+            return ids_json
+        elif Format == 'tab2':
+            if tab2_format == 'str': #return raw string w/ newline chars
+                return results
+            elif tab2_format == 'list':
+                return results.split('\n')
+        else:
+            print ("Specify either <'json'> or <'tab2'> as arguments for the Format parameter")
+            return
+        
     def identifiers(self, Format='tab2', tab2_format='str'):
         """
         Returns valid identifier types
@@ -132,18 +181,20 @@ class BioGrid(object):
             print ("Specify either <'json'> or <'tab2'> as arguments for the Format parameter")
             return
         
-    def interactions(self, query, **kwargs):
+    def interactions(self, **kwargs):
         
         query_params = (
-                        ('q', query),
-                        ('max', kwargs.pop('max_results', 600)),
-                        ('facet', kwargs.pop('facet', 'association')),
-                        ('pvalfilter', kwargs.pop('pvalfilter', '5e-8')),
-                        ('orfilter', kwargs.pop('orfilter', '')),
-                        ('betafilter', kwargs.pop('betafilter', '')),
-                        ('datefilter', kwargs.pop('datefilter', '')),
-                        ('sort', kwargs.pop('sort', '')),
-                        ('asc', kwargs.pop('asc', ''))
+            ('accessKey', self.access_key),
+            ('format', kwargs.pop('Format', 'str')),
+            ('start', kwargs.pop('start', 0)),
+            ('max', kwargs.pop('max', 10000)),
+            ('interSpeciesExcluded', kwargs.pop('interSpeciesExcluded', 'false')),
+            ('selfInteractionsExcluded', kwargs.pop('selfInteractionsExcluded', 'false')),
+            ('orfilter', kwargs.pop('orfilter', '')),
+            ('betafilter', kwargs.pop('betafilter', '')),
+            ('datefilter', kwargs.pop('datefilter', '')),
+            ('sort', kwargs.pop('sort', '')),
+            ('asc', kwargs.pop('asc', ''))
                        )
         
         query_params = [(param[0], param[1].encode('utf-8')
@@ -156,7 +207,17 @@ class BioGrid(object):
         request = urlopen(query_string)
         results = request.read()
         
-        return self.byteify(json.loads(results))
+        if Format == 'json':
+            ids_json = self.byteify(json.loads(results))
+            return ids_json
+        elif Format == 'tab2':
+            if tab2_format == 'str': #return raw string w/ newline chars
+                return results
+            elif tab2_format == 'list':
+                return results.split('\n')
+        else:
+            print ("Specify either <'json'> or <'tab2'> as arguments for the Format parameter")
+            return
     
     def version(self):
         '''Returns the biogrid webservice version'''
