@@ -1,20 +1,19 @@
-from __future__ import print_function
-from biogrid_results import ResponseHandler as BGRH
+from __future__ import print_function, absolute_import
+from biogridpy.biogrid_results import ResponseHandler as BGRH
 
 try:
-    import urlparse, types
+    import urlparse
     from urllib import urlencode
     from urllib2 import urlopen
     from ConfigParser import ConfigParser
     config = ConfigParser()
-    config.read('biogrid_ak.ini')
+    
 except:
     from urllib.parse import urlparse
     from urllib.parse import urlencode
     from urllib.request import urlopen
     from configparser import ConfigParser
     config = ConfigParser()
-    config.read_file(open('biogrid_ak.ini'))
     
 class BioGRID(object):
     """BioGRID API webservice client
@@ -31,7 +30,12 @@ class BioGRID(object):
     version()
     """
 
-    def __init__(self): 
+    def __init__(self, config_filepath='../biogridpyrc'): 
+        try:
+            config.read(config_filepath) 
+        except:
+            config.read_file(open(config_filepath))
+            
         self.ACCESS_KEY= config.get('BioGRID_ak', 'access_key')
         BASE_URL = 'http://webservice.thebiogrid.org/'
         self.BASE_URL = BASE_URL
@@ -64,18 +68,13 @@ class BioGRID(object):
         (e.g. http://webservice.thebiogrid.org/evidence/?accesskey=[ACCESSKEY]&format=json). 
         """
         query_params = (('accessKey', self.ACCESS_KEY),
-                        ('format', format_)
-                        )
-        
-        query_params = [(param[0], param[1].encode('utf-8')
-                         if type(param[1]) is types.UnicodeType
-                         else param[1]) for param in query_params]
+                        ('format', format_))
                              
         query_string = urlencode(query_params)
         query_string = '{0}?{1}'.format(self.EVIDENCE_URL, query_string)
         
         request = urlopen(query_string)
-        results = request.read()
+        results = request.read().decode('utf-8')
         
         return BGRH(results, format_, 'count Not Supported by this endpoint')
         
@@ -102,18 +101,13 @@ class BioGRID(object):
         (e.g. http://webservice.thebiogrid.org/identifiers/?accesskey=[ACCESSKEY]&format=json).
         """
         query_params = (('accessKey', self.ACCESS_KEY),
-                        ('format', format_)
-                        )
-        
-        query_params = [(param[0], param[1].encode('utf-8')
-                         if type(param[1]) is types.UnicodeType
-                         else param[1]) for param in query_params]
+                        ('format', format_))
                              
         query_string = urlencode(query_params)
         query_string = '{0}?{1}'.format(self.IDENTIFIERS_URL, query_string)
         
         request = urlopen(query_string)
-        results = request.read()
+        results = request.read().decode('utf-8')
         
         return BGRH(results, format_, 'count Not Supported by this endpoint')
             
@@ -161,21 +155,17 @@ class BioGRID(object):
         count = self._getcount(start, max_, **kwargs) #how many records returned by this query?
 
         results = []
-        for page_start in xrange(start, count, max_):
-    
+        for page_start in range(start, count, max_):
             valid_kwargs = self._validate_params(kwargs, page_start, max_)
             query_params_kwargs = tuple({(k,v) for k,v in valid_kwargs.items()})
             # combine default parameters with optional params from kwargs
             query_params = query_params_default + query_params_kwargs
-            query_params = [(param[0], param[1].encode('utf-8')
-                             if type(param[1]) is types.UnicodeType
-                             else param[1]) for param in query_params]
                                  
             query_string = urlencode(query_params)
             query_string = '{0}?{1}'.format(self.INTERACTIONS_URL, query_string)
             
             request = urlopen(query_string)
-            results.append(request.read())
+            results.append(request.read().decode('utf-8'))
 
         return BGRH(results, format_, count)
     
@@ -193,17 +183,13 @@ class BioGRID(object):
         """
         # set default parameters
         query_params = (('accessKey', self.ACCESS_KEY), ('format', format_))
-
-        query_params = [(param[0], param[1].encode('utf-8')
-                         if type(param[1]) is types.UnicodeType
-                         else param[1]) for param in query_params]
                              
         query_string = urlencode(query_params)
         query_string = '{0}{1}?{2}'.format(self.INTERACTIONS_URL,
                                             interaction_id,
                                             query_string)
         request = urlopen(query_string)
-        result = request.read()
+        result = request.read().decode('utf-8')
 
         return BGRH([result], format_, 'count Not Supported by this endpoint')
     
@@ -214,13 +200,13 @@ class BioGRID(object):
         Usage:
         # Default params return a string identical to the default webservice:
         # http://webservice.thebiogrid.org/organisms/?accesskey=[ACCESSKEY]
-        >>> id_types = BioGrid().organisms(format_='tab2', tab2_format='str')
+        >>> id_types = BioGRID().organisms(format_='tab2')
         
         # For a Python list of the identifiers, change tab2_format to 'list':
-        >>> id_types = BioGrid().organisms(format_='tab2', tab2_format='list')
+        >>> id_types = BioGRID().organisms(format_='tab2')
         
         # Finally, to replicate the "format=json" parameter:
-        >>> id_types = BioGrid().organisms(format_='json')
+        >>> id_types = BioGRID().organisms(format_='json')
             {'10029': 'Cricetulus griseus',
              '10090': 'Mus musculus',
              '10116': 'Rattus norvegicus',
@@ -234,34 +220,25 @@ class BioGRID(object):
         (e.g. http://webservice.thebiogrid.org/organisms/?accesskey=[ACCESSKEY]&format=json).
         """
         query_params = (('accessKey', self.ACCESS_KEY),
-                        ('format', format_)
-                        )
-        
-        query_params = [(param[0], param[1].encode('utf-8')
-                         if type(param[1]) is types.UnicodeType
-                         else param[1]) for param in query_params]
+                        ('format', format_))
                              
         query_string = urlencode(query_params)
         query_string = '{0}?{1}'.format(self.ORGANISMS_URL, query_string)
         
         request = urlopen(query_string)
-        results = request.read()
+        results = request.read().decode('utf-8')
         
         return BGRH(results, format_, 'count Not Supported by this endpoint')
     
     def version(self):
         '''Returns the biogrid webservice version'''
         query_params = (('accessKey', self.ACCESS_KEY),)
-        
-        query_params = [(param[0], param[1].encode('utf-8')
-                         if type(param[1]) is types.UnicodeType
-                         else param[1]) for param in query_params]
                              
         query_string = urlencode(query_params)
         query_string = '{0}?{1}'.format(self.VERSION_URL, query_string)
 
         request = urlopen(query_string)
-        results = request.read()
+        results = request.read().decode('utf-8')
         return results
     
     def _getcount(self, page_start, max_, **kwargs):
@@ -276,20 +253,16 @@ class BioGRID(object):
         query_params_kwargs = tuple({(k,v) for k,v in valid_kwargs.items()})
         # combine default parameters with optional params from kwargs
         query_params = query_params_default + query_params_kwargs
-        query_params = [(param[0], param[1].encode('utf-8')
-                         if type(param[1]) is types.UnicodeType
-                         else param[1]) for param in query_params]
                              
         query_string = urlencode(query_params)
         query_string = '{0}?{1}'.format(self.INTERACTIONS_URL, query_string)
-        
+
         request = urlopen(query_string)
-        return int(request.read())
+        return int(request.read().decode('utf-8'))
     
     def _validate_params(self, params, page_start, max_):
         """
-        The purpose of this function is to provide informational error
-        messages when (keyword) parameters are't working as expected.
+        checks paramaeters and transforms the list-like args
         """
         valid_params = (
         'start', 'max', 'interSpeciesExcluded',
@@ -300,8 +273,8 @@ class BioGRID(object):
         'excludePubmeds', 'htpThreshold', 'throughputTag', 'taxId',
         'includeHeader', 'translate'
         )
-        # iterate parameters to check for validity, also
-        # handle formatting for list-like arguments.
+        # don't modify the params dictionary object, create new one
+        returnedParams = params.copy()
         for param in params.keys():
             if param not in valid_params:
                 raise ValueError("'%s' parameter not valid: see "
@@ -311,24 +284,24 @@ class BioGRID(object):
             if param == 'evidenceList':
                 try: #opening a evidenceList file
                     with open(params[param]) as f:
-                        params[param] = '|'.join(f.read().splitlines())
+                        returnedParams[param] = '|'.join(f.read().splitlines())
                 except Exception as e:
-                    params[param] = '|'.join(params[param])
+                    returnedParams[param] = '|'.join(params[param])
             elif param == 'geneList':
                 try: #opening a geneList file
                     with open(params[param]) as f:
-                        params[param] = '|'.join(f.read().splitlines())
+                        returnedParams[param] = '|'.join(f.read().splitlines())
                 except Exception as e:
-                    #print ('No geneList.list file found, using keyword argument, or None')
-                    params[param] = '|'.join(params[param])
+                    returnedParams[param] = '|'.join(params[param])
             elif param == 'additionalIdentifierTypes':
                 try: #opening a additionalIdentifierTypes.List file
+                    # this was working
                     with open(params[param]) as f:
-                        params[param] = '|'.join(f.read().splitlines())
+                        returnedParams[param] = '|'.join(f.read().splitlines())
                 except Exception as e:
-                    params[param] = '|'.join(params[param])
+                    returnedParams[param] = '|'.join(params[param])
         #pagination
-        params['start']= page_start
-        params['max']= max_
+        returnedParams['start']= page_start
+        returnedParams['max']= max_
         
-        return params
+        return returnedParams

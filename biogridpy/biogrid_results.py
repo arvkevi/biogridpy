@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 import os, json, inspect
 from itertools import chain
 try:
@@ -79,7 +79,10 @@ class ResponseHandler(object):
             #don't need column headers for these endpoints
             delattr(self, 'headers') # <--best practice?
             if self.output_format == 'json':
-                self.result = self._byteify(json.loads(self.raw_result))
+                try: #2
+                    self.result = self._byteify2(json.loads(self.raw_result))
+                except AttributeError: #3
+                    self.result = self._byteify3(json.loads(self.raw_result))
             elif self.output_format == 'tab2':
                 # organisms endpoint has two columns
                 if self.endpoint == 'organisms':
@@ -124,7 +127,7 @@ class ResponseHandler(object):
         Usage:
         >>>BG = BioGrid()
         >>>bg_results = BG.interactions('json', geneList='geneList.list')
-        >>>bg_results.export(outdir='/home/user', fileame='biogridpy_response')
+        >>>bg_results.export(outdir='/home/user', filename='biogridpy_response')
         """
 
         suffix = self.output_format
@@ -133,8 +136,12 @@ class ResponseHandler(object):
         if (self.output_format == 'json' or
             self.output_format == 'jsonExtended'):
             filepath = os.path.join(outdir, filename + "." + suffix)
-            with open(filepath, 'w') as outfile:
-                json.dump(self._byteify(self.result), outfile)
+            try:
+                with open(filepath, 'w') as outfile:
+                    json.dump(self._byteify2(self.result), outfile)
+            except AttributeError:
+                with open(filepath, 'w') as outfile:
+                    json.dump(self._byteify3(self.result), outfile)
         #tab out need to add headers
         elif (self.output_format == 'tab2' or
               self.output_format == 'extendedTab2' or
@@ -143,10 +150,6 @@ class ResponseHandler(object):
             with open(filepath, 'w') as outfile:
                 outfile.write('#' + '\t'.join(self.headers))
                 outfile.write(self.result)
-
-    #def summary(self):
-    #   placeholder, provide stats on the results.
-    #   pass
     
     def toDataFrame(self):
         """
@@ -163,22 +166,35 @@ class ResponseHandler(object):
         >>>df = pd.read_csv(bg_results.toDataFrame(), sep='\t')
         """
         if self.output_format in ('json', 'jsonExtended'):
-            #bg_results.result, orient='index')
             return json.dumps(self.result)
         
         elif self.output_format in ('tab2', 'extendedTab2'):
-            return StringIO(self.result)
+            return StringIO('\t'.join(self.headers) + self.result)
         
-    def _byteify(self, inpt):
+    def _byteify2(self, inpt):
         """
         Helper function, recursively keeps elements as strings.
         """
         if isinstance(inpt, dict):
-            return {self._byteify( key): self._byteify(value)
+            return {self._byteify2( key): self._byteify2(value)
                     for key, value in inpt.iteritems()}
         elif isinstance(inpt, list):
-            return [self._byteify(element) for element in inpt]
+            return [self._byteify2(element) for element in inpt]
         elif isinstance(inpt, unicode):
             return inpt.encode('utf-8')
+        else:
+            return inpt
+    
+    def _byteify3(self, inpt):
+        """
+        Helper function, recursively keeps elements as strings.
+        """
+        if isinstance(inpt, dict):
+            return {self._byteify3( key): self._byteify3(value)
+                    for key, value in inpt.items()}
+        elif isinstance(inpt, list):
+            return [self._byteify3(element) for element in inpt]
+        elif isinstance(inpt, str):
+            return inpt
         else:
             return inpt
