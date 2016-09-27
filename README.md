@@ -29,7 +29,6 @@ access_key = YourAccessKeyHere
 ---
 Instantiate the BioGRID client:
 ```python
-$ python
 >>> from biogridpy.biogrid_client import BioGRID
 >>> BG = BioGRID()
 ```
