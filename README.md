@@ -14,7 +14,7 @@ $ python setup.py
 ## Usage 
 
 
-**Before using the client, get a *free* access key [here](http://webservice.thebiogrid.org/) or if you alread have one, see below:**
+**Before using the client, get a *free* access key [here](http://webservice.thebiogrid.org/) or if you already have one, see below:**
 
 Copy and Paste the access key to the **biogridpyrc** file:
 
@@ -70,6 +70,7 @@ The export method will save the result object as a file in the proper format acc
 
 ---
 The following **non-interaction** endpoints are also available:
+
 1. evidence
 2. identifiers
 3. organisms
