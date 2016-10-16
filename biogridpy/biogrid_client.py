@@ -6,15 +6,15 @@ try:
     from urllib import urlencode
     from urllib2 import urlopen
     from ConfigParser import ConfigParser
-    config = ConfigParser()
     
 except:
     from urllib.parse import urlparse
     from urllib.parse import urlencode
     from urllib.request import urlopen
     from configparser import ConfigParser
-    config = ConfigParser()
-    
+   
+config = ConfigParser()
+ 
 class BioGRID(object):
     """BioGRID API webservice client
     Methods are REST service endpoints, for more detailed description,
@@ -76,7 +76,7 @@ class BioGRID(object):
         request = urlopen(query_string)
         results = request.read().decode('utf-8')
         
-        return BGRH(results, format_, 'count Not Supported by this endpoint')
+        return BGRH(results, format_, 'count not supported by this endpoint')
         
     def identifiers(self, format_='tab2'):
         """
@@ -109,7 +109,7 @@ class BioGRID(object):
         request = urlopen(query_string)
         results = request.read().decode('utf-8')
         
-        return BGRH(results, format_, 'count Not Supported by this endpoint')
+        return BGRH(results, format_, 'count not supported by this endpoint')
             
     def interactions(self, format_, **kwargs):
         """
@@ -191,7 +191,7 @@ class BioGRID(object):
         request = urlopen(query_string)
         result = request.read().decode('utf-8')
 
-        return BGRH([result], format_, 'count Not Supported by this endpoint')
+        return BGRH([result], format_, 'count not supported by this endpoint')
     
     def organisms(self, format_='tab2'):
         """
@@ -228,7 +228,7 @@ class BioGRID(object):
         request = urlopen(query_string)
         results = request.read().decode('utf-8')
         
-        return BGRH(results, format_, 'count Not Supported by this endpoint')
+        return BGRH(results, format_, 'count not supported by this endpoint')
     
     def version(self):
         '''Returns the biogrid webservice version'''

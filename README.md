@@ -16,11 +16,13 @@ $ python setup.py
 
 **Before using the client, get a *free* access key [here](http://webservice.thebiogrid.org/) or if you already have one, see below:**
 
-Copy and Paste the access key to the **biogridpyrc** file:
+Copy and paste the access key to the existing **biogridpyrc** file, or you can create a new **biogridpyrc** file anywhere you like.
 
 ```bash
 $ vi biogridpyrc
 ```
+
+**biogridpyrc** should look like this:
 
 ```bash
 [BioGRID_ak]
@@ -30,7 +32,7 @@ access_key = YourAccessKeyHere
 Instantiate the BioGRID client:
 ```python
 >>> from biogridpy.biogrid_client import BioGRID
->>> BG = BioGRID()
+>>> BG = BioGRID(config_filepath='/path/to/biogridpyrc') # provide path to biogridpyrc file
 ```
 
 The **interactions** endpoint is the most commonly utilized.  The first and only positional argument is a string that describes the type of result format.  Valid keyword arguments are the same parameters from the [parameter list](http://wiki.thebiogrid.org/doku.php/biogridrest#list_of_parameters).  Any parameter that accepts a list of ```|``` separated identifiers can be a Python list type object or a file with one identifier per line.

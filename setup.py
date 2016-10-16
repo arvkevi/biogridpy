@@ -6,7 +6,7 @@ except ImportError:
 	from distutils.core import setup
 
 setup(name='biogridpy',
-	  version='0.1',
+	  version='0.1.1',
 	  description='Python client for the BioGRID REST API webservice',
 	  license='MIT',
 	  keywords=['genetics', 'genomics', 'interaction', 'bioinformatics'],
@@ -17,7 +17,7 @@ setup(name='biogridpy',
                    'Topic :: Scientific/Engineering :: Bio-Informatics'],
 	  author='Kevin Arvai',
 	  author_email='arvkevi@gmail.com',
-	  download_url = 'https://github.com/arvkevi/biogridpy/tarball/0.1',
+	  download_url = 'https://github.com/arvkevi/biogridpy/tarball/0.1.1',
 	  url = 'https://github.com/arvkevi/biogridpy',
 	  packages=['biogridpy'],
 zip_safe=False)
